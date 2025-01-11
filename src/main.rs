@@ -1,4 +1,5 @@
-use core::fmt;
+use num_traits::{self, AsPrimitive, PrimInt};
+use std::{fmt, ops};
 
 enum LR {
     Right,
@@ -31,17 +32,46 @@ impl Default for Block {
     }
 }
 
-struct LinePlace {
-    line: Vec<Block>,
-    // len: u8,
+struct CurrentPoint {
+    x: usize,
+    y: usize,
 }
-impl LinePlace {
-    fn new(len: i32) -> Self {
-        let mut line = Vec::<Block>::new();
-        for _ in 0..len {
-            line.push(Block::default());
+impl CurrentPoint {
+    // TODO: asの使えるトレイトをいつか
+    fn new(x: i32, y: i32) -> Self {
+        CurrentPoint {
+            x: x as usize,
+            y: y as usize,
         }
-        LinePlace { line }
+    }
+    // fn up(place: &Place) -> Self {
+
+    //     CurrentPoint { x: CurrentPoint{ x: place., y: todo!() } = , y: () }
+    // }
+}
+
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+impl Direction {
+    fn turn_right(&mut self) -> Self {
+        match self {
+            Direction::Up => Direction::Right,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+            Direction::Right => Direction::Down,
+        }
+    }
+    fn turn_left(&mut self) -> Self {
+        match self {
+            Direction::Up => Direction::Left,
+            Direction::Down => Direction::Right,
+            Direction::Left => Direction::Down,
+            Direction::Right => Direction::Up,
+        }
     }
 }
 
@@ -49,10 +79,11 @@ impl LinePlace {
 // TODO: remove unwrap
 struct Place {
     place: Vec<Vec<Block>>,
-    current_point: (i32, i32),
+    current_point: CurrentPoint,
+    current_direction: Direction,
 }
 impl Place {
-    fn new(len: i32, ini_point: (i32, i32)) -> Self {
+    fn new(len: i32, ini_point: CurrentPoint) -> Self {
         let mut place = Vec::<Vec<Block>>::new();
         // let mut line = Vec::<Block>::new();
         for _ in 0..len {
@@ -62,7 +93,11 @@ impl Place {
             }
             place.push(line);
         }
-        Place { place, current_point: ini_point }
+        Place {
+            place,
+            current_point: ini_point,
+            current_direction: Direction::Up,
+        }
     }
     fn len(&self) -> i32 {
         let mut count = 0;
@@ -74,7 +109,7 @@ impl Place {
     fn show(&self) {
         for i in &self.place {
             for j in i {
-                let res= if j.status == BlackOrWhite::Black {
+                let res = if j.status == BlackOrWhite::Black {
                     "■"
                 } else {
                     "□"
@@ -84,49 +119,67 @@ impl Place {
             println!();
         }
     }
-    fn block_status(&self, point: (usize, usize)) -> BlackOrWhite {
-        // let a = self.place.get(0).unwrap().get(0).unwrap();
-        if self.place.get(point.0).unwrap().get(point.1).unwrap().status == BlackOrWhite::Black {
-            BlackOrWhite::Black
-        } else {
-            BlackOrWhite::White
+    fn back_is_black(&self) -> bool {
+        self.place
+            // 縦列
+            .get(self.current_point.y)
+            .unwrap()
+            // 横列
+            .get(self.current_point.x)
+            .unwrap()
+            .status
+            == BlackOrWhite::Black
+    }
+    /// 一回の動作規則
+    /// 方向の変更と進行
+    fn action(&mut self, lr: LR) {
+        match lr {
+            LR::Right => self.current_direction = self.current_direction.turn_right(),
+            LR::Left => self.current_direction = self.current_direction.turn_left(),
         }
     }
-    // fn get(&self, point: (i32, i32)) -> Block {
-    //     // let a = self.place;
-    //     let t = self.place.get(0).unwrap();
-    // }
+    fn go(&mut self) {
+        match self.current_direction {
+            Direction::Up => {
+                self.current_point =
+                    CurrentPoint::new(self.current_point.x as i32, self.current_point.y as i32 - 1)
+            }
+            Direction::Down => {
+                self.current_point =
+                    CurrentPoint::new(self.current_point.x as i32, self.current_point.y as i32 + 1)
+            }
+            Direction::Left => {
+                self.current_point =
+                    CurrentPoint::new(self.current_point.x as i32 - 1, self.current_point.y as i32)
+            }
+            Direction::Right => {
+                self.current_point =
+                    CurrentPoint::new(self.current_point.x as i32 + 1, self.current_point.y as i32)
+            }
+        }
+    }
 }
 
 #[test]
 fn foo() {
-    let f = Place::new(100, (3, 4));
+    let f = Place::new(30, CurrentPoint { x: 5, y: 10 });
     f.show();
 }
 
 #[test]
 fn place_test() {
-    let f = Place::new(5, (1, 1));
+    let f = Place::new(5, CurrentPoint::new(1, 1));
     assert_eq!(f.len(), 5);
 }
 
-// struct Status {
-//     current_point : (i32, i32),
-//     current_place: Place,
-// }
-// impl Status {
-//     fn new(len: i32) -> Self{
-//         Status { current_point: (0, 0), current_place: Place::new(len, (0, 0)) }
-//     }
-//     // fn set(mut self, len: i32, point: (i32, i32)) -> Self {
-//     //     self.current_place = Place::new(len);
-//     //     self.current_point = point;
-//     //     self
-//     // }
-// }
-
 fn main() {
-    let len = 200;
-    let space = Place::new(len, (len / 2, len / 2));
-    println!("Hello, world!");
+    let len = 51;
+    let mut space = Place::new(len, CurrentPoint::new(len / 2, len / 2));
+    loop {
+        if space.back_is_black() {
+            space.action(LR::Left);
+        } else {
+            space.action(LR::Right);
+        }
+    }
 }
