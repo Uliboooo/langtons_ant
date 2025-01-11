@@ -1,5 +1,4 @@
-use num_traits::{self, AsPrimitive, PrimInt};
-use std::{fmt, ops};
+use std::{env, fmt};
 
 enum LR {
     Right,
@@ -137,7 +136,10 @@ impl Place {
             LR::Right => self.current_direction = self.current_direction.turn_right(),
             LR::Left => self.current_direction = self.current_direction.turn_left(),
         }
+        self.go();
+        self.show();
     }
+    // current_directionに1進める
     fn go(&mut self) {
         match self.current_direction {
             Direction::Up => {
@@ -172,14 +174,22 @@ fn place_test() {
     assert_eq!(f.len(), 5);
 }
 
+// TODO: 現在の位置を表すもの
 fn main() {
+    dotenv::dotenv().ok();
+    let loop_count = env::var("loop_count").unwrap().parse::<i32>().unwrap();
+
     let len = 51;
     let mut space = Place::new(len, CurrentPoint::new(len / 2, len / 2));
-    loop {
+    for i in 0..loop_count {
         if space.back_is_black() {
             space.action(LR::Left);
         } else {
             space.action(LR::Right);
+        }
+        if i % 2 == 0 {
+            space.show();
+            println!();
         }
     }
 }
