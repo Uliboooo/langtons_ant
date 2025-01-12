@@ -102,6 +102,8 @@ impl Place {
             current_direction: Direction::Left,
         }
     }
+    /// Returns the length of this [`Place`].
+    #[allow(dead_code)] //👈テスト用のため
     fn len(&self) -> i32 {
         let mut count = 0;
         for _ in &self.place {
@@ -109,6 +111,8 @@ impl Place {
         }
         count
     }
+
+    /// Returns the show of this [`Place`].
     fn show(&self) {
         //TODO: いつか一回のprintln!()で
         let mut result = String::new();
@@ -139,6 +143,7 @@ impl Place {
             LR::Left => self.current_direction = self.current_direction.turn_left(),
         }
     }
+    /// Returns the go of this [`Place`].
     // current_directionに1進める
     fn go(&mut self) {
         match self.current_direction {
@@ -196,9 +201,11 @@ fn main() {
 
     let mut space = Place::new(len, CurrentPoint::new(len / 2, len / 2));
     for i in 1..=loop_count {
-        if space.back_is_black() { // is black
+        if space.back_is_black() {
+            // is black
             space.action(LR::Left);
-        } else {                   // is white
+        } else {
+            // is white
             space.action(LR::Right);
         }
         space.invert();
