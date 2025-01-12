@@ -30,6 +30,14 @@ impl Default for Block {
         }
     }
 }
+impl Block {
+    fn invert(&mut self) {
+        match self.status {
+            BlackOrWhite::Black => self.status = BlackOrWhite::White,
+            BlackOrWhite::White => self.status = BlackOrWhite::Black,
+        }
+    }
+}
 
 struct CurrentPoint {
     x: usize,
@@ -43,10 +51,6 @@ impl CurrentPoint {
             y: y as usize,
         }
     }
-    // fn up(place: &Place) -> Self {
-
-    //     CurrentPoint { x: CurrentPoint{ x: place., y: todo!() } = , y: () }
-    // }
 }
 
 enum Direction {
@@ -106,31 +110,29 @@ impl Place {
         count
     }
     fn show(&self) {
+        //TODO: いつか一回のprintln!()で
+        let mut result = String::new();
         for i in &self.place {
+            let mut line_result = String::new();
             for j in i {
-                let res = if j.status == BlackOrWhite::Black {
+                line_result.push_str(if j.status == BlackOrWhite::Black {
                     "■"
                 } else {
                     "□"
-                };
-                print!("{} ", res);
+                });
+                line_result.push(' ');
             }
-            println!();
+            result.push_str(&format!("{}\n", line_result));
+            // print!("{} ", line_result);
         }
+        println!("{}\n", result);
     }
+    /// current_pointの背景が黒ならtrue、白ならfalse
     fn back_is_black(&self) -> bool {
-        self.place
-            // 縦列
-            .get(self.current_point.y)
-            .unwrap()
-            // 横列
-            .get(self.current_point.x)
-            .unwrap()
-            .status
-            == BlackOrWhite::Black
+        self.get_current_status() == &BlackOrWhite::Black
     }
-    /// 一回の動作規則
-    /// 方向の変更と進行
+    /// 一回の動作.
+    /// 方向の変更と進行.
     fn action(&mut self, lr: LR) {
         match lr {
             LR::Right => self.current_direction = self.current_direction.turn_right(),
@@ -160,11 +162,25 @@ impl Place {
             }
         }
     }
+    fn invert(&mut self) {
+        self.place
+            .get_mut(self.current_point.y)
+            .unwrap()
+            .get_mut(self.current_point.x)
+            .unwrap()
+            .invert();
+    }
+    fn get_status(&self, x: usize, y: usize) -> &BlackOrWhite {
+        &self.place.get(y).unwrap().get(x).unwrap().status
+    }
+    fn get_current_status(&self) -> &BlackOrWhite {
+        self.get_status(self.current_point.x, self.current_point.y)
+    }
 }
 
 #[test]
-fn foo() {
-    let f = Place::new(30, CurrentPoint { x: 5, y: 10 });
+fn show_test() {
+    let f = Place::new(51, CurrentPoint { x: 5, y: 10 });
     f.show();
 }
 
@@ -178,18 +194,19 @@ fn place_test() {
 fn main() {
     dotenv::dotenv().ok();
     let loop_count = env::var("loop_count").unwrap().parse::<i32>().unwrap();
+    let len = env::var("len").unwrap().parse::<i32>().unwrap();
 
-    let len = 51;
     let mut space = Place::new(len, CurrentPoint::new(len / 2, len / 2));
-    for i in 0..loop_count {
+    for _i in 0..=loop_count {
         if space.back_is_black() {
             space.action(LR::Left);
         } else {
             space.action(LR::Right);
         }
-        if i % 2 == 0 {
-            space.show();
-            println!();
-        }
+        space.invert();
+        // if i % 2 == 0 {
+        space.show();
+        println!();
+        // }
     }
 }
