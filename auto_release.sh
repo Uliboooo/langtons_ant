@@ -25,8 +25,6 @@ zip -j -9 ./release/langton_ant_mac_arm.zip ./README.md ./.env ./target/release/
 zip -j -9 ./release/langton_ant_mac_x86_64.zip ./README.md ./.env ./target/x86_64-apple-darwin/release/langton_ant
 zip -j -9 ./release/langton_ant_linux_x86_64.zip ./README.md ./.env ./target/x86_64-unknown-linux-gnu/release/langton_ant
 zip -j -9 ./release/langton_ant_win_x86_64.zip ./README.md ./.env ./target/x86_64-pc-windows-gnu/release/langton_ant.exe
-# "./release/"
-
 
 # for file_path in "${paths[@]}"
 # do
