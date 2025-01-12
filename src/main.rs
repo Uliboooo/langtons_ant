@@ -99,7 +99,7 @@ impl Place {
         Place {
             place,
             current_point: ini_point,
-            current_direction: Direction::Up,
+            current_direction: Direction::Left,
         }
     }
     fn len(&self) -> i32 {
@@ -138,8 +138,8 @@ impl Place {
             LR::Right => self.current_direction = self.current_direction.turn_right(),
             LR::Left => self.current_direction = self.current_direction.turn_left(),
         }
-        self.go();
-        self.show();
+        // self.go();
+        // self.show();
     }
     // current_directionに1進める
     fn go(&mut self) {
@@ -196,17 +196,20 @@ fn main() {
     let loop_count = env::var("loop_count").unwrap().parse::<i32>().unwrap();
     let len = env::var("len").unwrap().parse::<i32>().unwrap();
 
-    let mut space = Place::new(len, CurrentPoint::new(len / 2, len / 2));
-    for _i in 0..=loop_count {
-        if space.back_is_black() {
+    let mut space = Place::new(len, CurrentPoint::new(len / 2, len / 2 + 1));
+    for i in 0..=loop_count {
+        if space.back_is_black() { // is black
             space.action(LR::Left);
-        } else {
+            // space.invert();
+        } else {                   // is white
             space.action(LR::Right);
+            // space.invert();
         }
         space.invert();
+        space.go();
         // if i % 2 == 0 {
         space.show();
-        println!();
+        println!("{}", i);
         // }
     }
 }
