@@ -220,6 +220,6 @@ fn main() {
         export::export(&space);
         println!("👆{}回目", i);
     }
-    let mut foo = String::new();
-    let _ = std::io::stdin().read_line(&mut foo).unwrap();
+    let mut _foo = String::new();
+    std::io::stdin().read_line(&mut _foo).unwrap();
 }
