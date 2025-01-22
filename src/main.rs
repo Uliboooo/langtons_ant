@@ -1,4 +1,8 @@
 use std::{env, fmt};
+use serde::{Serialize, Deserialize};
+// use serde_json;
+
+mod export;
 
 enum LR {
     Right,
@@ -13,13 +17,13 @@ impl fmt::Display for LR {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 enum BlackOrWhite {
     Black,
     White,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Block {
     status: BlackOrWhite,
 }
@@ -39,6 +43,7 @@ impl Block {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 struct CurrentPoint {
     x: usize,
     y: usize,
@@ -53,6 +58,7 @@ impl CurrentPoint {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 enum Direction {
     Up,
     Down,
@@ -78,8 +84,8 @@ impl Direction {
     }
 }
 
-// TODO: Placeのメソッドで一括で場所指定して反転できる機能を実装
 // TODO: remove unwrap
+#[derive(Debug, Serialize, Deserialize)]
 struct Place {
     place: Vec<Vec<Block>>,
     current_point: CurrentPoint,
@@ -211,6 +217,9 @@ fn main() {
         space.invert();
         space.go();
         space.show();
+        export::export(&space);
         println!("👆{}回目", i);
     }
+    let mut foo = String::new();
+    let _ = std::io::stdin().read_line(&mut foo).unwrap();
 }
