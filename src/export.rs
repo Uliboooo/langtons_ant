@@ -2,9 +2,13 @@ use std::{fs, io::Write};
 // use serde_json;
 use crate::*;
 
-
 fn write_log(f: String) {
-    let mut file = fs::OpenOptions::new().read(true).create(true).append(true).open("log.jsonc").unwrap();
+    let mut file = fs::OpenOptions::new()
+        .read(true)
+        .create(true)
+        .append(true)
+        .open("log.jsonc")
+        .unwrap();
     writeln!(file, "{}", f).unwrap();
 }
 
